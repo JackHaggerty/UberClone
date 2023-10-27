@@ -1,6 +1,8 @@
 package nuber.students;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.Future;
 
 /**
@@ -17,6 +19,7 @@ public class NuberDispatch {
 	private final int MAX_DRIVERS = 999;
 	
 	private boolean logEvents = false;
+	Queue<Driver> idleDrivers = new LinkedList<>();
 	
 	/**
 	 * Creates a new dispatch objects and instantiates the required regions and any other objects required.
@@ -39,6 +42,7 @@ public class NuberDispatch {
 	 */
 	public boolean addDriver(Driver newDriver)
 	{
+		return idleDrivers.add(newDriver);
 	}
 	
 	/**
@@ -50,6 +54,7 @@ public class NuberDispatch {
 	 */
 	public Driver getDriver()
 	{
+		return idleDrivers.poll();
 	}
 
 	/**

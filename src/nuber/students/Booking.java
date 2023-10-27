@@ -1,5 +1,7 @@
 package nuber.students;
 
+import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 
  * Booking represents the overall "job" for a passenger getting to their destination.
@@ -19,7 +21,14 @@ package nuber.students;
  *
  */
 public class Booking {
-
+	
+	private static int counter = 0;
+	private int bookingId;
+	private NuberDispatch dispatch;
+	private Passenger passenger;
+	private Driver driver;
+	private Date bookingCreationTime;
+	
 		
 	/**
 	 * Creates a new booking for a given Nuber dispatch and passenger, noting that no
@@ -31,6 +40,10 @@ public class Booking {
 	 */
 	public Booking(NuberDispatch dispatch, Passenger passenger)
 	{
+        this.bookingId = ++counter;
+        this.dispatch = dispatch;
+        this.passenger = passenger;
+        this.bookingCreationTime = new Date();
 	}
 	
 	/**
@@ -50,7 +63,38 @@ public class Booking {
 	 * @return A BookingResult containing the final information about the booking 
 	 */
 	public BookingResult call() {
+		// ask dispatch for available driver
+		while (driver == null) {
+			driver = dispatch.getDriver();
+		}
+		// if no driver, wait for one
+		if (driver == null) {
+			
+		}
+		//once we have a driver, pick up and drive to destination
+		try {
+			driver.pickUpPassenger(passenger);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+			driver.driveToDestination();
+		} catch (InterruptedException e) {
 
+			e.printStackTrace();
+		}
+		
+		// once at destination record time
+        Date completionTime = new Date();
+        long duration = completionTime.getTime() - bookingCreationTime.getTime();
+        
+		//add driver back to dispatch list
+        dispatch.addDriver(driver);
+        
+		// return booking results
+		
+		return new BookingResult(bookingId, passenger, driver, duration);
 	}
 	
 	/***
@@ -66,6 +110,22 @@ public class Booking {
 	@Override
 	public String toString()
 	{
+		String driverName;
+		String passengerName;
+		
+		if(driver != null) {
+			driverName = driver.name;
+		}
+		else {
+			driverName = "null";
+		}
+		if(passenger != null) {
+			passengerName = passenger.name;
+		}
+		else {
+			passengerName = "null";
+		}
+		return bookingId + " : " + driverName + " : " + passengerName;
 	}
 
 }

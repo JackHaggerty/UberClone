@@ -18,7 +18,9 @@ import java.util.concurrent.Future;
  */
 public class NuberRegion {
 
-	
+	private int maxSilmultaneousJobs;
+	private String regionName;
+	private NuberDispatch dispatch;
 	/**
 	 * Creates a new Nuber region
 	 * 
@@ -28,7 +30,9 @@ public class NuberRegion {
 	 */
 	public NuberRegion(NuberDispatch dispatch, String regionName, int maxSimultaneousJobs)
 	{
-		
+		this.maxSilmultaneousJobs = maxSimultaneousJobs;
+		this.regionName = regionName;
+		this.dispatch = dispatch;
 
 	}
 	
