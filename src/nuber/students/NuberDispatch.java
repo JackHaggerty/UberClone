@@ -3,7 +3,12 @@ package nuber.students;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * The core Dispatch class that instantiates and manages everything for Nuber
@@ -20,6 +25,10 @@ public class NuberDispatch {
 	
 	private boolean logEvents = false;
 	Queue<Driver> idleDrivers = new LinkedList<>();
+	private Semaphore availableDrivers = new Semaphore(MAX_DRIVERS);
+	private HashMap<String, Integer> regionData = new HashMap<>();
+
+
 	
 	/**
 	 * Creates a new dispatch objects and instantiates the required regions and any other objects required.
@@ -30,6 +39,9 @@ public class NuberDispatch {
 	 */
 	public NuberDispatch(HashMap<String, Integer> regionInfo, boolean logEvents)
 	{
+		this.logEvents = true;
+		this.regionData.putAll(regionInfo);
+		
 	}
 	
 	/**
@@ -42,6 +54,7 @@ public class NuberDispatch {
 	 */
 	public boolean addDriver(Driver newDriver)
 	{
+		availableDrivers.release();
 		return idleDrivers.add(newDriver);
 	}
 	
@@ -52,8 +65,10 @@ public class NuberDispatch {
 	 * 
 	 * @return A driver that has been removed from the queue
 	 */
-	public Driver getDriver()
+	public Driver getDriver() throws InterruptedException
 	{
+		availableDrivers.acquire();
+
 		return idleDrivers.poll();
 	}
 
@@ -85,6 +100,12 @@ public class NuberDispatch {
 	 * @return returns a Future<BookingResult> object
 	 */
 	public Future<BookingResult> bookPassenger(Passenger passenger, String region) {
+		
+		ExecutorService b = Executors.newSingleThreadExecutor();
+		Callable<BookingResult> booking = new Booking(this, passenger); 
+		
+		Future<BookingResult> result = b.submit(booking);
+		return result;
 	}
 
 	/**
@@ -96,6 +117,7 @@ public class NuberDispatch {
 	 */
 	public int getBookingsAwaitingDriver()
 	{
+		return availableDrivers.getQueueLength();
 	}
 	
 	/**

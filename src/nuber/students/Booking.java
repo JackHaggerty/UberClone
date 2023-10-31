@@ -1,6 +1,7 @@
 package nuber.students;
 
 import java.util.Date;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 
@@ -20,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author james
  *
  */
-public class Booking {
+public class Booking implements Callable<BookingResult>{
 	
 	private static int counter = 0;
 	private int bookingId;
@@ -64,26 +65,20 @@ public class Booking {
 	 */
 	public BookingResult call() {
 		// ask dispatch for available driver
-		while (driver == null) {
-			driver = dispatch.getDriver();
-		}
-		// if no driver, wait for one
-		if (driver == null) {
-			
-		}
+	    try {
+	        driver = dispatch.getDriver();  
+	    } catch (InterruptedException e) {
+	        Thread.currentThread().interrupt();
+	    }
 		//once we have a driver, pick up and drive to destination
 		try {
 			driver.pickUpPassenger(passenger);
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		try {
 			driver.driveToDestination();
-		} catch (InterruptedException e) {
-
-			e.printStackTrace();
+		} catch (InterruptedException e1) {
+			
+			Thread.currentThread().interrupt();
 		}
+
 		
 		// once at destination record time
         Date completionTime = new Date();
@@ -127,5 +122,6 @@ public class Booking {
 		}
 		return bookingId + " : " + driverName + " : " + passengerName;
 	}
+
 
 }
