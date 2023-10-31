@@ -45,6 +45,7 @@ public class Booking implements Callable<BookingResult>{
         this.dispatch = dispatch;
         this.passenger = passenger;
         this.bookingCreationTime = new Date();
+		
 	}
 	
 	/**
@@ -64,15 +65,20 @@ public class Booking implements Callable<BookingResult>{
 	 * @return A BookingResult containing the final information about the booking 
 	 */
 	public BookingResult call() {
+
 		// ask dispatch for available driver
 	    try {
-	        driver = dispatch.getDriver();  
+	    	dispatch.logEvent(this, "Starting booking, getting driver");
+	        driver = dispatch.getDriver();
+	        
 	    } catch (InterruptedException e) {
 	        Thread.currentThread().interrupt();
 	    }
 		//once we have a driver, pick up and drive to destination
 		try {
+			dispatch.logEvent(this, "Starting, on way to passenger");
 			driver.pickUpPassenger(passenger);
+			dispatch.logEvent(this, "Collected passenger, on way to destination");
 			driver.driveToDestination();
 		} catch (InterruptedException e1) {
 			
@@ -83,7 +89,7 @@ public class Booking implements Callable<BookingResult>{
 		// once at destination record time
         Date completionTime = new Date();
         long duration = completionTime.getTime() - bookingCreationTime.getTime();
-        
+        dispatch.logEvent(this, "At destination, driver is now free");
 		//add driver back to dispatch list
         dispatch.addDriver(driver);
         

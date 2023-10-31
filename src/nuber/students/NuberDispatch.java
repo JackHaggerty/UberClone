@@ -2,6 +2,7 @@ package nuber.students;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -23,10 +24,10 @@ public class NuberDispatch {
 	 */
 	private final int MAX_DRIVERS = 999;
 	
-	private boolean logEvents = false;
+	private boolean logEvents;
 	Queue<Driver> idleDrivers = new LinkedList<>();
 	private Semaphore availableDrivers = new Semaphore(MAX_DRIVERS);
-	private HashMap<String, Integer> regionData = new HashMap<>();
+	private HashMap<String, NuberRegion> regionData = new HashMap<>();
 
 
 	
@@ -39,8 +40,15 @@ public class NuberDispatch {
 	 */
 	public NuberDispatch(HashMap<String, Integer> regionInfo, boolean logEvents)
 	{
-		this.logEvents = true;
-		this.regionData.putAll(regionInfo);
+		this.logEvents = logEvents;
+	    // Instantiate the regions
+	    for (Map.Entry<String, Integer> entry : regionInfo.entrySet()) {
+	        String regionName = entry.getKey();
+	        int maxBookings = entry.getValue();
+	        NuberRegion region = new NuberRegion(this, regionName, maxBookings);
+	        regionData.put(regionName, region);
+	    }
+	    
 		
 	}
 	
@@ -54,7 +62,7 @@ public class NuberDispatch {
 	 */
 	public boolean addDriver(Driver newDriver)
 	{
-		availableDrivers.release();
+		
 		return idleDrivers.add(newDriver);
 	}
 	
@@ -100,12 +108,11 @@ public class NuberDispatch {
 	 * @return returns a Future<BookingResult> object
 	 */
 	public Future<BookingResult> bookPassenger(Passenger passenger, String region) {
-		
-		ExecutorService b = Executors.newSingleThreadExecutor();
-		Callable<BookingResult> booking = new Booking(this, passenger); 
-		
-		Future<BookingResult> result = b.submit(booking);
+		Future<BookingResult> result = regionData.get(region).bookPassenger(passenger);
+		availableDrivers.release();
+
 		return result;
+
 	}
 
 	/**
@@ -124,6 +131,9 @@ public class NuberDispatch {
 	 * Tells all regions to finish existing bookings already allocated, and stop accepting new bookings
 	 */
 	public void shutdown() {
+	    for (NuberRegion region : regionData.values()) {
+	        region.shutdown();
+	    }
 	}
 
 }

@@ -1,5 +1,8 @@
 package nuber.students;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
@@ -21,6 +24,8 @@ public class NuberRegion {
 	private int maxSilmultaneousJobs;
 	private String regionName;
 	private NuberDispatch dispatch;
+	private boolean isShutdown;
+	private ExecutorService executor = Executors.newCachedThreadPool(); // thread pool to manage bookings
 	/**
 	 * Creates a new Nuber region
 	 * 
@@ -49,6 +54,13 @@ public class NuberRegion {
 	 */
 	public Future<BookingResult> bookPassenger(Passenger waitingPassenger)
 	{		
+		if (isShutdown) {
+			System.out.println("Booking rejected due to region shutdown.");
+			return null;
+		}
+		Callable<BookingResult> bookingTask = new Booking(dispatch, waitingPassenger);
+		
+		return executor.submit(bookingTask);
 		
 	}
 	
@@ -57,6 +69,8 @@ public class NuberRegion {
 	 */
 	public void shutdown()
 	{
+		isShutdown = true;
+		executor.shutdown();
 	}
 		
 }
