@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -25,7 +26,7 @@ public class NuberDispatch {
 	private final int MAX_DRIVERS = 999;
 	
 	private boolean logEvents;
-	Queue<Driver> idleDrivers = new LinkedList<>();
+	Queue<Driver> idleDrivers = new ConcurrentLinkedDeque<>();
 	private Semaphore availableDrivers = new Semaphore(MAX_DRIVERS);
 	private HashMap<String, NuberRegion> regionData = new HashMap<>();
 
@@ -62,7 +63,8 @@ public class NuberDispatch {
 	 */
 	public boolean addDriver(Driver newDriver)
 	{
-		
+		// when a driver is added the semaphore releases a permit, indicating that a driver has become available.
+		availableDrivers.release();
 		return idleDrivers.add(newDriver);
 	}
 	
@@ -75,9 +77,13 @@ public class NuberDispatch {
 	 */
 	public Driver getDriver() throws InterruptedException
 	{
-		availableDrivers.acquire();
-
-		return idleDrivers.poll();
+	    Driver fetchedDriver = null;
+	    while (fetchedDriver == null) {
+	        availableDrivers.acquire();
+	        fetchedDriver = idleDrivers.poll();
+	    
+	    }
+	    return fetchedDriver;
 	}
 
 	/**
@@ -109,7 +115,7 @@ public class NuberDispatch {
 	 */
 	public Future<BookingResult> bookPassenger(Passenger passenger, String region) {
 		Future<BookingResult> result = regionData.get(region).bookPassenger(passenger);
-		availableDrivers.release();
+		
 
 		return result;
 
