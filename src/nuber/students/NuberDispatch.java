@@ -63,7 +63,7 @@ public class NuberDispatch {
 	 */
 	public boolean addDriver(Driver newDriver)
 	{
-		// when a driver is added the semaphore releases a permit, indicating that a driver has become available.
+		// when a driver is added the semaphore releases a permit, indicating that a driver has become available to be matched with passengers.
 		availableDrivers.release();
 		return idleDrivers.add(newDriver);
 	}
@@ -77,8 +77,13 @@ public class NuberDispatch {
 	 */
 	public Driver getDriver() throws InterruptedException
 	{
+		
 	    Driver fetchedDriver = null;
+	    // loop until driver is fetch from the queue
+	    
 	    while (fetchedDriver == null) {
+	    	// acuire permit from semaphore
+	    	// blocks until a permit is available
 	        availableDrivers.acquire();
 	        fetchedDriver = idleDrivers.poll();
 	    
@@ -114,6 +119,8 @@ public class NuberDispatch {
 	 * @return returns a Future<BookingResult> object
 	 */
 	public Future<BookingResult> bookPassenger(Passenger passenger, String region) {
+		
+		// get region and book passenger
 		Future<BookingResult> result = regionData.get(region).bookPassenger(passenger);
 		
 

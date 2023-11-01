@@ -40,7 +40,7 @@ public class Simulation {
 		// create drivers that are available for jobs
 		for (int i = 0; i < maxDrivers; i++) {
 			Driver d = new Driver("D-" + Person.getRandomName(), maxSleep);
-			System.out.println("adding driver: " + d.name);
+			//System.out.println("adding driver: " + d.name);
 			dispatch.addDriver(d);
 		}
 
