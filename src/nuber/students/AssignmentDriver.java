@@ -66,8 +66,8 @@ public class AssignmentDriver {
 		
 //		new Simulation(regions, 1, 10, 1000, logEvents);
 //		new Simulation(regions, 5, 10, 1000, logEvents);
-		new Simulation(regions, 10, 10, 1000, logEvents);
-//		new Simulation(regions, 10, 100, 1000, logEvents);
+//		new Simulation(regions, 10, 10, 1000, logEvents);
+		new Simulation(regions, 10, 100, 1000, logEvents);
 //		new Simulation(regions, 1, 50, 1000, logEvents);
 	}
 
