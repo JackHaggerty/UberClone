@@ -68,7 +68,7 @@ public class Booking implements Callable<BookingResult>{
 
 		// ask dispatch for available driver
 	    try {
-	    	dispatch.logEvent(this, "Starting booking, getting driver");
+	    	dispatch.logEvent(this, "STARTING booking, getting driver");
 	        driver = dispatch.getDriver();
 	        
 	    } catch (InterruptedException e) {
@@ -89,7 +89,7 @@ public class Booking implements Callable<BookingResult>{
 		// once at destination record time
         Date completionTime = new Date();
         long duration = completionTime.getTime() - bookingCreationTime.getTime();
-        dispatch.logEvent(this, "At destination, driver is now free");
+        dispatch.logEvent(this, "COMPLETED At destination, driver is now free");
 		//add driver back to dispatch list
         dispatch.addDriver(driver);
         
