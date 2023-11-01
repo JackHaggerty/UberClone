@@ -25,7 +25,8 @@ public class NuberRegion {
 	private String regionName;
 	private NuberDispatch dispatch;
 	private boolean isShutdown;
-	private ExecutorService executor = Executors.newCachedThreadPool(); // thread pool to manage bookings
+	// thread pool to manage bookings
+	private ExecutorService executor;
 	/**
 	 * Creates a new Nuber region
 	 * 
@@ -38,6 +39,8 @@ public class NuberRegion {
 		this.maxSilmultaneousJobs = maxSimultaneousJobs;
 		this.regionName = regionName;
 		this.dispatch = dispatch;
+		
+		this.executor = Executors.newFixedThreadPool(maxSimultaneousJobs);
 
 	}
 	
@@ -58,9 +61,12 @@ public class NuberRegion {
 			System.out.println("Booking rejected due to region shutdown.");
 			return null;
 		}
+		// call()
 		Callable<BookingResult> bookingTask = new Booking(dispatch, waitingPassenger);
+		Future<BookingResult> task = executor.submit(bookingTask);
 		
-		return executor.submit(bookingTask);
+		
+		return task; 
 		
 	}
 	

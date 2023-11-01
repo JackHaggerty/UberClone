@@ -9,7 +9,7 @@ public class AssignmentDriver {
 
 		//turn this or off to enable/disable output from the dispatch's logEvent function
 		//use the logEvent function to print out debug output when required.
-		boolean logEvents = true;
+		boolean logEvents = false;
 		
 //		HashMap<String, Integer> testRegions = new HashMap<String, Integer>();
 //		testRegions.put("Test Region", 50);

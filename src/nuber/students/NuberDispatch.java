@@ -80,14 +80,15 @@ public class NuberDispatch {
 		
 	    Driver fetchedDriver = null;
 	    // loop until driver is fetch from the queue
-	    // needed for the event of a permit being availble but 
-	    //while (fetchedDriver == null) {
+	    // while loop to ensure getDriver does not return null
+	    //
+	    while (fetchedDriver == null) {
 	    	// acuire permit from semaphore
 	    	// blocks until a permit is available
 	        availableDrivers.acquire();
 	        fetchedDriver = idleDrivers.poll();
 	    
-	    //}
+	    }
 	    return fetchedDriver;
 	}
 
