@@ -82,7 +82,7 @@ public class Simulation {
 					i.remove();
 				}
 			}
-
+			
 			//print status update
 			System.out.println("Active bookings: " + bookings.size()+", pending: "+dispatch.getBookingsAwaitingDriver());
 
@@ -97,5 +97,6 @@ public class Simulation {
 		//print out the final information for the simulation run
 		long totalTime = new Date().getTime() - start;
 		System.out.println("Simulation complete in "+totalTime+"ms");
+		
 	}
 }

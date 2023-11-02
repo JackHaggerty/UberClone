@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -26,9 +27,11 @@ public class NuberDispatch {
 	private final int MAX_DRIVERS = 999;
 	
 	private boolean logEvents;
-	Queue<Driver> idleDrivers = new ConcurrentLinkedDeque<>();
-	private Semaphore availableDrivers = new Semaphore(MAX_DRIVERS);
+	//thread safe queue
+	Queue<Driver> idleDrivers = new ConcurrentLinkedQueue<>();
+	//private Semaphore availableDrivers = new Semaphore(1);
 	private HashMap<String, NuberRegion> regionData = new HashMap<>();
+	private int bookingCount = 0;
 
 
 	
@@ -61,11 +64,22 @@ public class NuberDispatch {
 	 * @param The driver to add to the queue.
 	 * @return Returns true if driver was added to the queue
 	 */
-	public boolean addDriver(Driver newDriver)
+	public synchronized boolean addDriver(Driver newDriver)
 	{
-		// when a driver is added the semaphore releases a permit, indicating that a driver has become available to be matched with passengers.
-		availableDrivers.release();
-		return idleDrivers.add(newDriver);
+		Boolean result = idleDrivers.offer(newDriver);
+		if (result) {
+			bookingCount--;
+			if (bookingCount < 0) {
+				bookingCount = 0;
+			}
+		}
+		try {
+			notifyAll();
+		}
+		catch (Exception e) {
+			System.out.println("Exception "+e+" on notifyAll");
+		}
+		return result;
 	}
 	
 	/**
@@ -75,21 +89,20 @@ public class NuberDispatch {
 	 * 
 	 * @return A driver that has been removed from the queue
 	 */
-	public Driver getDriver() throws InterruptedException
+	public synchronized Driver getDriver() throws InterruptedException
 	{
+		bookingCount++;
+		try {
+			while (idleDrivers.isEmpty()) {
+				
+				wait();
+			}
+		}
+		catch (Exception e) {
+			System.out.println("Exception "+e+" on wait");
+		}
 		
-	    Driver fetchedDriver = null;
-	    // loop until driver is fetch from the queue
-	    // while loop to ensure getDriver does not return null
-	    //
-	    while (fetchedDriver == null) {
-	    	// acuire permit from semaphore
-	    	// blocks until a permit is available
-	        availableDrivers.acquire();
-	        fetchedDriver = idleDrivers.poll();
-	    
-	    }
-	    return fetchedDriver;
+	    return idleDrivers.poll();
 	}
 
 	/**
@@ -138,7 +151,10 @@ public class NuberDispatch {
 	 */
 	public int getBookingsAwaitingDriver()
 	{
-		return availableDrivers.getQueueLength();
+		return bookingCount;
+	}
+	public synchronized void decrementBookingCount() {
+	    bookingCount--;
 	}
 	
 	/**
