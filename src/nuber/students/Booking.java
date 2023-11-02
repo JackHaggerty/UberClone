@@ -73,6 +73,7 @@ public class Booking implements Callable<BookingResult>{
 		// ask dispatch for available driver
 	    try {
 	    	dispatch.logEvent(this, "STARTING booking, getting driver");
+	    	// bookingcount++
 	        driver = dispatch.getDriver();
 	        
 	    } catch (InterruptedException e) {
@@ -100,6 +101,7 @@ public class Booking implements Callable<BookingResult>{
         
         
 		//add driver back to dispatch list
+        // bookingCount--
         dispatch.addDriver(driver);
         
 		// return booking results

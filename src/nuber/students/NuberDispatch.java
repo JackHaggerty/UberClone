@@ -91,7 +91,10 @@ public class NuberDispatch {
 	 */
 	public synchronized Driver getDriver() throws InterruptedException
 	{
-		bookingCount++;
+		if (idleDrivers.isEmpty()) {
+			bookingCount++;
+		}
+		
 		try {
 			while (idleDrivers.isEmpty()) {
 				
