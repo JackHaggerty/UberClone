@@ -29,9 +29,8 @@ public class NuberDispatch {
 	private boolean logEvents;
 	//thread safe queue
 	Queue<Driver> idleDrivers = new ConcurrentLinkedQueue<>();
-	//private Semaphore availableDrivers = new Semaphore(1);
 	private HashMap<String, NuberRegion> regionData = new HashMap<>();
-	private int bookingCount = 0;
+	private int bookingsAwaitingDriver = 0;
 
 
 	
@@ -68,9 +67,9 @@ public class NuberDispatch {
 	{
 		Boolean result = idleDrivers.offer(newDriver);
 		if (result) {
-			bookingCount--;
-			if (bookingCount < 0) {
-				bookingCount = 0;
+			bookingsAwaitingDriver--;
+			if (bookingsAwaitingDriver < 0) {
+				bookingsAwaitingDriver = 0;
 			}
 		}
 		try {
@@ -91,13 +90,13 @@ public class NuberDispatch {
 	 */
 	public synchronized Driver getDriver() throws InterruptedException
 	{
+		// count pending bookings, if idle drivers is empty thread must wait
 		if (idleDrivers.isEmpty()) {
-			bookingCount++;
+			bookingsAwaitingDriver++;
 		}
-		
+		// wait if no drivers available
 		try {
 			while (idleDrivers.isEmpty()) {
-				
 				wait();
 			}
 		}
@@ -154,12 +153,9 @@ public class NuberDispatch {
 	 */
 	public int getBookingsAwaitingDriver()
 	{
-		return bookingCount;
+		return bookingsAwaitingDriver;
 	}
-	public synchronized void decrementBookingCount() {
-	    bookingCount--;
-	}
-	
+
 	/**
 	 * Tells all regions to finish existing bookings already allocated, and stop accepting new bookings
 	 */
