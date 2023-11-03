@@ -90,7 +90,7 @@ public class NuberDispatch {
 	 */
 	public synchronized Driver getDriver() throws InterruptedException
 	{
-		// count pending bookings, if idle drivers is empty thread must wait
+		// count pending bookings, if idleDrivers is empty thread must wait
 		if (idleDrivers.isEmpty()) {
 			bookingsAwaitingDriver++;
 		}

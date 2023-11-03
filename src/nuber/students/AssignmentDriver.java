@@ -9,18 +9,18 @@ public class AssignmentDriver {
 
 		//turn this or off to enable/disable output from the dispatch's logEvent function
 		//use the logEvent function to print out debug output when required.
-		boolean logEvents = false;
+		boolean logEvents = true;
 		
 //		HashMap<String, Integer> testRegions = new HashMap<String, Integer>();
 //		testRegions.put("Test Region", 50);
 //		
-
-		
-		/**
-		 * This driver has a number of different sections that you can uncomment as you progress through the assignment
-		 * Once you have completed all parts, you should be able to run this entire function uncommented successfully
-		 */
-
+//
+//		
+//		/**
+//		 * This driver has a number of different sections that you can uncomment as you progress through the assignment
+//		 * Once you have completed all parts, you should be able to run this entire function uncommented successfully
+//		 */
+//
 //		Passenger testPassenger = new Passenger("Alex", 100);
 //
 //		Driver testDriver = new Driver("Barbara", 100);
@@ -64,11 +64,11 @@ public class AssignmentDriver {
 		regions.put("North", 50);
 		regions.put("South", 50);
 		
-		new Simulation(regions, 1, 10, 1000, logEvents);
+//		new Simulation(regions, 1, 10, 1000, logEvents);
 		new Simulation(regions, 5, 10, 1000, logEvents);		
-		new Simulation(regions, 10, 10, 1000, logEvents);
-		new Simulation(regions, 10, 100, 1000, logEvents);		
-		new Simulation(regions, 1, 50, 1000, logEvents);
+//		new Simulation(regions, 10, 10, 1000, logEvents);
+//		new Simulation(regions, 10, 100, 1000, logEvents);		
+//		new Simulation(regions, 1, 50, 1000, logEvents);
 	}
 
 }

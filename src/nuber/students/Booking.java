@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Booking implements Callable<BookingResult>{
 	
 	private static int counter = 0;
+	private static final Object lock = new Object();
 	private int bookingId;
 	private NuberDispatch dispatch;
 	private Passenger passenger;
@@ -41,7 +42,11 @@ public class Booking implements Callable<BookingResult>{
 	 */
 	public Booking(NuberDispatch dispatch, Passenger passenger)
 	{
-        this.bookingId = ++counter;
+		// using lock to synchronise the increment of bookingId to prevent race conditions
+		synchronized(lock) {
+			this.bookingId = ++counter;
+		}
+        
         dispatch.logEvent(this, "Creating Booking");
 		
 
